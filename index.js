@@ -11,7 +11,7 @@ const routes = require("./routes");
 // Constants
 const PORT = process.env.PORT || 8000;
 const corsOptions = {
-    origin: ["https://text-me-seven.vercel.app", "http://localhost:3000"],
+    origin: ["https://text-me-client.onrender.com", "http://localhost:3000"],
     credentials: true,
 };
 
