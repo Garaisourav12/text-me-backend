@@ -7,7 +7,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: ["https://text-me-seven.vercel.app", "http://localhost:3000"],
+        origin: ["https://text-me-client.vercel.app", "http://localhost:3000"],
+        methodes: ["GET", "POST", "PUT", "DELETE"],
         methods: ["GET", "POST"],
     },
 });
