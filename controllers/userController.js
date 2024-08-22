@@ -86,7 +86,7 @@ module.exports.login = async (req, res) => {
             .cookie("token", token, {
                 maxAge: 1000 * 60 * 60 * 24,
                 httpOnly: true,
-                sameSite: "strict",
+                sameSite: "lax",
             })
             .json({
                 message: "Logged in successfully",
