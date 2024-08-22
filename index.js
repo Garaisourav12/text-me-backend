@@ -11,7 +11,8 @@ const routes = require("./routes");
 // Constants
 const PORT = process.env.PORT || 8000;
 const corsOptions = {
-    origin: ["https://text-me-client.onrender.com", "http://localhost:3000"],
+    origin: true,
+    exposedHeaders: ["Content-Disposition"],
     credentials: true,
 };
 
@@ -20,11 +21,11 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
 
-// Routes
-app.use("/api", routes);
-
 // Database Connection
 require("./db");
+
+// Routes
+app.use("/api", routes);
 
 // Server Start
 server.listen(PORT, () => {

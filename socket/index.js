@@ -7,10 +7,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: [
-            "https://text-me-client.onrender.com",
-            "http://localhost:3000",
-        ],
+        origin: true,
         methods: ["GET", "POST"],
     },
 });
