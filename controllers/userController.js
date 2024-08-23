@@ -102,7 +102,10 @@ module.exports.logout = async (req, res) => {
     try {
         return res
             .status(200)
-            .clearCookie("token")
+            .clearCookie("token", {
+                sameSite: "none",
+                secure: true,
+            })
             .json({ message: "Logged out successfully" });
     } catch (error) {
         return res.status(500).json({ error: error.message });
