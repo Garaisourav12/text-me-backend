@@ -12,7 +12,6 @@ const routes = require("./routes");
 const PORT = process.env.PORT || 8000;
 const corsOptions = {
     origin: true,
-    exposedHeaders: ["Content-Disposition"],
     credentials: true,
 };
 
