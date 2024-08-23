@@ -50,15 +50,11 @@ module.exports.sendMessage = async (req, res) => {
 
         // Scocket.io
         const receiverSocketId = getSocketId(receiverId);
-        const senderSocketId = getSocketId(senderId);
         if (receiverSocketId) {
             io.to(receiverSocketId).emit("newMessage", newMessage);
         }
-        if (senderSocketId) {
-            io.to(senderSocketId).emit("sentMessage", newMessage);
-        }
 
-        return res.status(200).json({ message: "Message sent successfully" });
+        return res.status(200).json({ message: newMessage });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
