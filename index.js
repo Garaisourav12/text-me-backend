@@ -24,6 +24,13 @@ app.use(cors(corsOptions));
 require("./db");
 
 // Routes
+app.use("/", (req, res) => {
+    return res.json({
+        message: "Welcome to the TextMe API",
+        version: "1.0.0",
+        documentation_url: "https://example.com/docs",
+    });
+});
 app.use("/api", routes);
 
 // Server Start
