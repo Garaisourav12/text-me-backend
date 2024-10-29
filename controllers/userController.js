@@ -87,7 +87,8 @@ module.exports.login = async (req, res) => {
 			.cookie("token", token, {
 				maxAge: 1000 * 60 * 60 * 24,
 				httpOnly: true,
-				sameSite: "none",
+				sameSite:
+					process.env.NODE_ENV === "development" ? "strict" : "none",
 				secure: process.env.NODE_ENV !== "development",
 			})
 			.json({
@@ -109,7 +110,8 @@ module.exports.logout = async (req, res) => {
 		return res
 			.status(200)
 			.clearCookie("token", {
-				sameSite: "none",
+				sameSite:
+					process.env.NODE_ENV === "development" ? "strict" : "none",
 				secure: process.env.NODE_ENV !== "development",
 			})
 			.json({ message: "Logged out successfully" });
