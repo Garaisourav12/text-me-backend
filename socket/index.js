@@ -1,6 +1,7 @@
 const { Server } = require("socket.io");
 const http = require("http");
 const express = require("express");
+const { subscriber, publishLogin, publishLogout } = require("../pubsub");
 
 const app = express();
 
@@ -12,9 +13,49 @@ const io = new Server(server, {
 	},
 });
 
-const userSocketMap = {}; // {userId->socketId}
+// Store the loggedin user's socket id who are connected to this server instance
+const userSocketMap = {}; // { userId -> [socketId, ...] }
 
+// Store all loggedin user's userId accross the all server instances
+const onlineUsers = {}; // { userId -> count of logged-in instances }
+
+// Helper function to get socketId by userId
 const getSocketId = (userId) => userSocketMap[userId];
+
+// Helper function to get all online users
+const getOnlineUsers = () => Object.keys(onlineUsers);
+
+// React on published message from pubsub
+subscriber.on("message", (channel, message) => {
+	const data = JSON.parse(message);
+
+	if (channel === "login") {
+		onlineUsers[data.userId] = (onlineUsers[data.userId] || 0) + 1;
+		io.emit("online", getOnlineUsers());
+	} else if (channel === "logout") {
+		if (!onlineUsers[data.userId]) return;
+		onlineUsers[data.userId] > 1
+			? (onlineUsers[data.userId] -= 1)
+			: delete onlineUsers[data.userId];
+		io.emit("online", getOnlineUsers());
+	} else if (channel === "new-message") {
+		const { newMessage } = data;
+
+		const recieverSockets = getSocketId(newMessage.receiverId);
+		if (recieverSockets) {
+			recieverSockets.forEach((socketId) => {
+				io.to(socketId).emit("newMessage", newMessage);
+			});
+		}
+
+		const senderSockets = getSocketId(newMessage.senderId);
+		if (senderSockets) {
+			senderSockets.forEach((socketId) => {
+				io.to(socketId).emit("sentMessage", newMessage);
+			});
+		}
+	}
+});
 
 io.on("connection", (socket) => {
 	const userId = socket.handshake.query.userId;
@@ -25,6 +66,9 @@ io.on("connection", (socket) => {
 		} else {
 			userSocketMap[userId] = [socket.id];
 		}
+
+		// Publish login event
+		publishLogin(userId);
 	}
 
 	io.emit("getOnlineUsers", Object.keys(userSocketMap));
@@ -39,6 +83,9 @@ io.on("connection", (socket) => {
 				delete userSocketMap[userId];
 			}
 		}
+
+		// Publish logout event
+		publishLogout(userId);
 
 		io.emit("getOnlineUsers", Object.keys(userSocketMap));
 	});

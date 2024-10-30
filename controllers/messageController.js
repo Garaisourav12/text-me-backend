@@ -1,6 +1,6 @@
 const Message = require("../models/msgModel");
 const Conversation = require("../models/conversationModel");
-const { io, getSocketId } = require("../socket/index");
+const { publishMessage } = require("../pubsub");
 
 module.exports.sendMessage = async (req, res) => {
 	const senderId = req.userId;
@@ -48,20 +48,8 @@ module.exports.sendMessage = async (req, res) => {
 		gotConversation.messages.push(newMessage);
 		await gotConversation.save();
 
-		// Scocket.io
-		const receiverSocketIds = getSocketId(receiverId); // Return array of socketIds of multiple login
-		if (receiverSocketIds) {
-			receiverSocketIds.forEach((receiverSocketId) => {
-				io.to(receiverSocketId).emit("newMessage", newMessage);
-			});
-		}
-
-		const senderSocketIds = getSocketId(senderId);
-		if (senderSocketIds) {
-			senderSocketIds.forEach((senderSocketId) => {
-				io.to(senderSocketId).emit("sentMessage", newMessage);
-			});
-		}
+		// Publish message
+		publishMessage(newMessage);
 
 		return res.status(200).json({ message: newMessage });
 	} catch (error) {
